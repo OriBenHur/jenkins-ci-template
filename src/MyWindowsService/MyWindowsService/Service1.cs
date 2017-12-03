@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.ServiceProcess;
 using Couchbase;
@@ -9,7 +10,7 @@ namespace MyWindowsService
 {
     public partial class Service1 : ServiceBase
     {
-        bool firstRun;
+        private bool _firstRun;
         public Service1()
         {
             InitializeComponent();
@@ -17,21 +18,21 @@ namespace MyWindowsService
 
         protected override void OnStart(string[] args)
         {
-            firstRun = true;
+            _firstRun = true;
 
             Log(
-                LogToCouchbase(new List<string> { "OnStart:", DateTime.Now.ToString() })
+                LogToCouchbase(new List<string> { "OnStart:", DateTime.Now.ToString(CultureInfo.InvariantCulture) })
             );
         }
 
         protected override void OnStop()
         {
             Log(
-                 LogToCouchbase(new List<string> { "OnStop:", DateTime.Now.ToString() })
+                 LogToCouchbase(new List<string> { "OnStop:", DateTime.Now.ToString(CultureInfo.InvariantCulture) })
              );
         }
 
-        private List<string> Log(List<string> lines)
+        private static List<string> Log(List<string> lines)
         {
             try
             {
@@ -54,7 +55,7 @@ namespace MyWindowsService
         {
             try
             {
-                if (firstRun)
+                if (_firstRun)
                 {
                     var config = new ClientConfiguration
                     {
@@ -63,7 +64,7 @@ namespace MyWindowsService
 
                     ClusterHelper.Initialize(config);
 
-                    firstRun = false;
+                    _firstRun = false;
                 }
 
                 // this will overwrite any old log lines!
